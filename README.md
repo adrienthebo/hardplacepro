@@ -20,6 +20,7 @@ make docker
 
 ```
 docker run -t hardplacepro:latest tomorrow
+docker run -t hardplacepro:latest thursday
 ```
 
 ## Overengineered?
