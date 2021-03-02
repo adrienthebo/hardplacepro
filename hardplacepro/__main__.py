@@ -29,7 +29,6 @@ PARAMS = {
         "X-Requested-With": "XMLHttpRequest",
     },
     "referrer": "https://app.rockgympro.com/b/widget/?a=offering&offering_guid=3d2b6cb6c62f4025b4c616a2b77b856f&random=602adc4500203&iframeid=&mode=p",
-    "body": "PreventChromeAutocomplete=&random=603e65c25539a&iframeid=&mode=p&fctrl_1=offering_guid&offering_guid=3d2b6cb6c62f4025b4c616a2b77b856f&fctrl_2=course_guid&course_guid=&fctrl_3=limited_to_course_guid_for_offering_guid_3d2b6cb6c62f4025b4c616a2b77b856f&limited_to_course_guid_for_offering_guid_3d2b6cb6c62f4025b4c616a2b77b856f=&fctrl_4=show_date&show_date=2021-03-03&ftagname_0_pcount-pid-1-1301=pcount&ftagval_0_pcount-pid-1-1301=1&ftagname_1_pcount-pid-1-1301=pid&ftagval_1_pcount-pid-1-1301=1301&fctrl_5=pcount-pid-1-1301&pcount-pid-1-1301=0&ftagname_0_pcount-pid-1-3664346=pcount&ftagval_0_pcount-pid-1-3664346=1&ftagname_1_pcount-pid-1-3664346=pid&ftagval_1_pcount-pid-1-3664346=3664346&fctrl_6=pcount-pid-1-3664346&pcount-pid-1-3664346=0&ftagname_0_pcount-pid-1-3664347=pcount&ftagval_0_pcount-pid-1-3664347=1&ftagname_1_pcount-pid-1-3664347=pid&ftagval_1_pcount-pid-1-3664347=3664347&fctrl_7=pcount-pid-1-3664347&pcount-pid-1-3664347=0",
     "method": "POST",
     "mode": "cors",
 }
