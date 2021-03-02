@@ -5,7 +5,6 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from pprint import pprint
 import typing as t
 import json
 import logging
@@ -36,6 +35,7 @@ PARAMS = {
 
 @dataclass(frozen=True)
 class Reservation:
+    date: str
     slot: str
     is_available: bool
     spaces: t.Optional[int]
@@ -43,16 +43,20 @@ class Reservation:
     @classmethod
     def from_tr(cls, tag: element.Tag) -> "Reservation":
         tds = tag.find_all("td")
-        slot = tds[0].getText().strip()
+
+        dow, dom, slot = tds[0].getText().strip().split(",")
+        date = f"{dow} {dom}"
+        slot = slot.replace("  ", " ")
+
         is_available = tds[1].select_one(".offering-page-event-is-full") is None
         is_available = is_available and "NOT AVAILABLE YET" not in tds[3].text
 
         spaces = 0
-        m = re.search('(\d+)\s+spaces', tds[1].getText())
+        m = re.search(r"(\d+)\s+spaces?", tds[1].getText())
         if m is not None:
             spaces = int(m[1])
 
-        return cls(slot, is_available, spaces)
+        return cls(date, slot, is_available, spaces)
 
 
 def query(ts: datetime) -> t.Sequence[Reservation]:
@@ -91,12 +95,7 @@ def query(ts: datetime) -> t.Sequence[Reservation]:
         "pcount-pid-1-3664347": 0,
     }
 
-    r = http.request(
-        "POST",
-        BASEURL,
-        headers=PARAMS["headers"],
-        body=urlencode(fields)
-    )
+    r = http.request("POST", BASEURL, headers=PARAMS["headers"], body=urlencode(fields))
 
     data = r.data.decode("utf-8")
     doc = None
@@ -112,7 +111,6 @@ def query(ts: datetime) -> t.Sequence[Reservation]:
     return [Reservation.from_tr(row) for row in rows]
 
 
-
 def setup(debug):
     if debug:
         level = logging.DEBUG
@@ -122,13 +120,21 @@ def setup(debug):
     logging.basicConfig(level=level)
     logging.getLogger("asyncio").level = logging.FATAL
 
+
 @click.command()
-@click.argument("date")
-@click.option("--debug", type=bool, default=False, help="Enable debug logging", required=False)
-@click.option("--color", type=click.Choice(["never", "auto", "always"]), default="auto", help="Enable debug logging", required=False)
+@click.argument("date", nargs=-1)
+@click.option(
+    "--debug", type=bool, default=False, help="Enable debug logging", required=False
+)
+@click.option(
+    "--color",
+    type=click.Choice(["never", "auto", "always"]),
+    default="auto",
+    help="Enable debug logging",
+    required=False,
+)
 def main(date, debug, color):
     setup(debug)
-    ts = dateparser.parse(date, settings={'PREFER_DATES_FROM': 'future'})
 
     color_output: t.Optional[bool] = None
     if color == "never":
@@ -136,14 +142,26 @@ def main(date, debug, color):
     if color == "always":
         color_output = True
 
-    if ts is None:
-        print(f"invalid date: {ts}")
-    else:
-        print(f"Fetching reservations for {ts}")
-        reservations = query(ts)
+    daily_reservations = []
+
+    timestamps = [
+        dateparser.parse(ts, settings={"PREFER_DATES_FROM": "future"}) for ts in date
+    ]
+    if not all(timestamps):
+        print("One or more invalid timestamps. You figure it out.")
+        return None
+
+    for ts in timestamps:
+        daily_reservations.append((ts, query(ts)))
+
+    for date, reservations in daily_reservations:
+        print(date.strftime("%Y-%m-%d"))
         for r in reservations:
             fg = "green" if r.is_available else "red"
-            click.echo(click.style(f"{r.slot}: {r.is_available}, {r.spaces}", fg=fg), color=color_output)
+            click.echo(
+                click.style(f"\t{r.slot}\t{r.spaces}", fg=fg),
+                color=color_output,
+            )
 
 
 if __name__ == "__main__":
