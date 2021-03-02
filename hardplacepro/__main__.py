@@ -125,9 +125,17 @@ def setup(debug):
 @click.command()
 @click.argument("date")
 @click.option("--debug", type=bool, default=False, help="Enable debug logging", required=False)
-def main(date, debug):
+@click.option("--color", type=click.Choice(["never", "auto", "always"]), default="auto", help="Enable debug logging", required=False)
+def main(date, debug, color):
     setup(debug)
     ts = dateparser.parse(date, settings={'PREFER_DATES_FROM': 'future'})
+
+    color_output: t.Optional[bool] = None
+    if color == "never":
+        color_output = False
+    if color == "always":
+        color_output = True
+
     if ts is None:
         print(f"invalid date: {ts}")
     else:
@@ -135,7 +143,7 @@ def main(date, debug):
         reservations = query(ts)
         for r in reservations:
             fg = "green" if r.is_available else "red"
-            click.echo(click.style(f"{r.slot}: {r.is_available}, {r.spaces}", fg=fg))
+            click.echo(click.style(f"{r.slot}: {r.is_available}, {r.spaces}", fg=fg), color=color_output)
 
 
 if __name__ == "__main__":
