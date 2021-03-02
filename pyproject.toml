@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "hardplacepro"
+version = "0.1.0"
+description = ""
+authors = ["Adrien Thebo <adrien@lagrange-automation.io>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+urllib3 = "^1.26.3"
+click = "^7.1.2"
+dateparser = "^1.0.0"
+black = {version = "^20.8b1", optional = true}
+beautifulsoup4 = "^4.9.3"
+ipdb = "^0.13.5"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+black = "^20.8b1"
+isort = "^5.7.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
