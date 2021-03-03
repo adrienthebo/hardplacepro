@@ -10,6 +10,7 @@ import json
 import logging
 from urllib.parse import urlencode
 import re
+from functools import cached_property
 
 import click
 import dateparser
@@ -37,7 +38,7 @@ PARAMS = {
 class Reservation:
     date: str
     slot: str
-    is_available: bool
+    availability: t.Literal["available", "full", "too-early"]
     spaces: t.Optional[int]
 
     @classmethod
@@ -48,15 +49,24 @@ class Reservation:
         date = f"{dow} {dom}"
         slot = slot.replace("  ", " ")
 
-        is_available = tds[1].select_one(".offering-page-event-is-full") is None
-        is_available = is_available and "NOT AVAILABLE YET" not in tds[3].text
-
         spaces = 0
+
+        if tds[1].select_one(".offering-page-event-is-full") is not None:
+            availability = "full"
+        elif tds[3].select_one(".offering-page-call-for-booking") is not None:
+            availability = "too-early"
+        else:
+            availability = "available"
+
         m = re.search(r"(\d+)\s+spaces?", tds[1].getText())
         if m is not None:
             spaces = int(m[1])
 
-        return cls(date, slot, is_available, spaces)
+        return cls(date=date, slot=slot, availability=availability, spaces=spaces)
+
+    @cached_property
+    def is_available(self) -> bool:
+        return self.availability == "available"
 
 
 def query(ts: datetime) -> t.Sequence[Reservation]:
@@ -159,7 +169,7 @@ def main(date, debug, color):
         for r in reservations:
             fg = "green" if r.is_available else "red"
             click.echo(
-                click.style(f"\t{r.slot}\t{r.spaces}", fg=fg),
+                click.style(f"\t{r.slot}\t{r.spaces}\t{r.availability}", fg=fg),
                 color=color_output,
             )
 
