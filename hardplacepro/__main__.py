@@ -5,6 +5,7 @@
 
 from dataclasses import dataclass
 from datetime import datetime
+import calendar
 import typing as t
 import json
 import logging
@@ -165,7 +166,8 @@ def main(date, debug, color):
         daily_reservations.append((ts, query(ts)))
 
     for date, reservations in daily_reservations:
-        print(date.strftime("%Y-%m-%d"))
+        dow = calendar.day_name[date.weekday()]
+        print(date.strftime(f"%Y-%m-%d {dow}"))
         for r in reservations:
             fg = "green" if r.is_available else "red"
             click.echo(
