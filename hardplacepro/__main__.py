@@ -170,10 +170,8 @@ def main(date, debug, color):
         print(date.strftime(f"%Y-%m-%d {dow}"))
         for r in reservations:
             fg = "green" if r.is_available else "red"
-            click.echo(
-                click.style(f"\t{r.slot}\t{r.spaces}\t{r.availability}", fg=fg),
-                color=color_output,
-            )
+            msg = f"\t{r.slot}\t{r.spaces}\t{r.availability}"
+            click.echo(click.style(msg, fg=fg), color=color_output)
 
 
 if __name__ == "__main__":
