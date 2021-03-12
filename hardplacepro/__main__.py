@@ -20,18 +20,12 @@ from bs4 import BeautifulSoup, element
 
 BASEURL = "https://app.rockgympro.com/b/widget/?a=equery"
 
-PARAMS = {
-    "credentials": "include",
-    "headers": {
-        "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0",
-        "Accept": "*/*",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        "X-Requested-With": "XMLHttpRequest",
-    },
-    "referrer": "https://app.rockgympro.com/b/widget/?a=offering&offering_guid=3d2b6cb6c62f4025b4c616a2b77b856f&random=602adc4500203&iframeid=&mode=p",
-    "method": "POST",
-    "mode": "cors",
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0",
+    "Accept": "*/*",
+    "Accept-Language": "en-US,en;q=0.5",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "X-Requested-With": "XMLHttpRequest",
 }
 
 
@@ -106,7 +100,7 @@ def query(ts: datetime) -> t.Sequence[Reservation]:
         "pcount-pid-1-3664347": 0,
     }
 
-    r = http.request("POST", BASEURL, headers=PARAMS["headers"], body=urlencode(fields))
+    r = http.request("POST", BASEURL, headers=HEADERS, body=urlencode(fields))
 
     data = r.data.decode("utf-8")
     doc = None
