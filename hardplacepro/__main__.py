@@ -64,6 +64,11 @@ class Reservation:
         return self.availability == "available"
 
 
+# Best be blood offering
+OFFERING = "82956994a32d4ece965f4903614cf6c8"
+COURSE = "b21f8c4cea31f4f8d388ae05232096c8fb5f058a"
+
+
 def query(ts: datetime) -> t.Sequence[Reservation]:
     http = urllib3.PoolManager()
 
@@ -73,11 +78,11 @@ def query(ts: datetime) -> t.Sequence[Reservation]:
         "iframeid": "",
         "mode": "p",
         "fctrl_1": "offering_guid",
-        "offering_guid": "3d2b6cb6c62f4025b4c616a2b77b856f",
+        "offering_guid": OFFERING,
         "fctrl_2": "course_guid",
         "course_guid": "",
-        "fctrl_3": "limited_to_course_guid_for_offering_guid_3d2b6cb6c62f4025b4c616a2b77b856f",
-        "limited_to_course_guid_for_offering_guid_3d2b6cb6c62f4025b4c616a2b77b856f": "",
+        "fctrl_3": f"limited_to_course_guid_for_offering_guid_{OFFERING}",
+        f"limited_to_course_guid_for_offering_guid_{OFFERING}": "",
         "fctrl_4": "show_date",
         "show_date": ts.strftime("%Y-%m-%d"),
         "ftagname_0_pcount-pid-1-1301": "pcount",
