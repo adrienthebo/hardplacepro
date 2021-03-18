@@ -200,7 +200,10 @@ def check(ctx, date, time):
         fg = "green" if r.is_available else "red"
         msg = f"\t{r.slot}\t{r.spaces}\t{r.availability}\t{r.start}"
         click.echo(click.style(msg, fg=fg), color=ctx.obj["use_color"])
-        sys.exit(0)
+
+        exit_code = 0 if r.is_available else 1
+        if not r.is_available:
+            raise click.ClickException("Slot not available")
     else:
         click.echo(click.style("No match", fg="red"), color=ctx.obj["use_color"])
         sys.exit(1)

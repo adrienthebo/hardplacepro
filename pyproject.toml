@@ -12,6 +12,7 @@ dateparser = "^1.0.0"
 black = {version = "^20.8b1", optional = true}
 beautifulsoup4 = "^4.9.3"
 ipdb = "^0.13.5"
+isort = "^5.7.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

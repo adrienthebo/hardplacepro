@@ -13,6 +13,6 @@ WORKDIR /app
 COPY . .
 
 RUN pip install "poetry==$POETRY_VERSION"
-RUN poetry install --no-dev
+RUN poetry export --without-hashes -f requirements.txt | pip install -r /dev/stdin
 
-ENTRYPOINT ["poetry", "run", "./hardplacepro/__main__.py"]
+ENTRYPOINT ["python3", "./hardplacepro/__main__.py"]

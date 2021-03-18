@@ -252,7 +252,7 @@ python-versions = "*"
 name = "isort"
 version = "5.7.0"
 description = "A Python utility / library to sort Python imports."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6,<4.0"
 
@@ -608,7 +608,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "a01f93f6c2342d9bca5fb5f8bec0f60ab68006bbfd5cb42859c8cc581f3d6454"
+content-hash = "4b0edd521901b55d9d2ad8444491dfdcc0e43f47651a6c7568339a8b1f50af78"
 
 [metadata.files]
 appdirs = [
