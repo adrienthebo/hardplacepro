@@ -3,16 +3,16 @@
 
 """
 
-from dataclasses import dataclass
-from datetime import datetime
 import calendar
-import typing as t
 import json
 import logging
-from urllib.parse import urlencode
 import re
-from functools import cached_property
 import sys
+import typing as t
+from dataclasses import dataclass
+from datetime import datetime
+from functools import cached_property
+from urllib.parse import urlencode
 
 import click
 import dateparser
