@@ -12,6 +12,7 @@ import logging
 from urllib.parse import urlencode
 import re
 from functools import cached_property
+import sys
 
 import click
 import dateparser
@@ -39,6 +40,14 @@ class Reservation:
     slot: str
     start: datetime
     stop: datetime
+
+    def __contains__(self, other: t.Any):
+        if not isinstance(other, datetime):
+            raise Exception(
+                "your datetime set inclusion is bad and you should feel bad"
+            )
+
+        return other >= self.start and other <= self.stop
 
     @classmethod
     def from_tr(cls, tag: element.Tag) -> "Reservation":
@@ -178,11 +187,23 @@ def cli(ctx, debug, color):
 @click.argument("date")
 @click.argument("time")
 @click.pass_context
-def get(ctx, datestr, timestr):
+def check(ctx, date, time):
     parser_settings = {"PREFER_DATES_FROM": "future"}
 
-    parser_settings = {"PREFER_DATES_FROM": "future"}
-    date = dateparser.parse(ts, settings=parser_settings)
+    reservations = query(dateparser.parse(date, settings=parser_settings))
+    target = dateparser.parse(f"{date} {time}", settings=parser_settings)
+
+    matched = [r for r in reservations if target in r]
+
+    if len(matched) > 0:
+        r = matched[0]
+        fg = "green" if r.is_available else "red"
+        msg = f"\t{r.slot}\t{r.spaces}\t{r.availability}\t{r.start}"
+        click.echo(click.style(msg, fg=fg), color=ctx.obj["use_color"])
+        sys.exit(0)
+    else:
+        click.echo(click.style("No match", fg="red"), color=ctx.obj["use_color"])
+        sys.exit(1)
 
 
 @cli.command()
