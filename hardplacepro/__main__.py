@@ -32,9 +32,13 @@ HEADERS = {
 @dataclass(frozen=True)
 class Reservation:
     date: str
-    slot: str
+
     availability: t.Literal["available", "full", "too-early"]
     spaces: t.Optional[int]
+
+    slot: str
+    start: datetime
+    stop: datetime
 
     @classmethod
     def from_tr(cls, tag: element.Tag) -> "Reservation":
@@ -44,7 +48,14 @@ class Reservation:
         date = f"{dow} {dom}"
         slot = slot.replace("  ", " ")
 
-        spaces = 0
+        # Get fuuuuuucked
+        # THIS IS WHY WE CAN'T HAVE NICE DATETIME LIBRARIES
+        m = re.search(r"(\d+\s+[AP]M)\s+to\s+([0-9:]+\s+[AP]M)", slot)
+        start_str = m[1]
+        stop_str = m[2]
+
+        start = dateparser.parse(f"{date} {start_str}")
+        stop = dateparser.parse(f"{date} {stop_str}")
 
         if tds[1].select_one(".offering-page-event-is-full") is not None:
             availability = "full"
@@ -53,11 +64,19 @@ class Reservation:
         else:
             availability = "available"
 
+        spaces = 0
         m = re.search(r"(\d+)\s+spaces?", tds[1].getText())
         if m is not None:
             spaces = int(m[1])
 
-        return cls(date=date, slot=slot, availability=availability, spaces=spaces)
+        return cls(
+            date=date,
+            slot=slot,
+            availability=availability,
+            spaces=spaces,
+            start=start,
+            stop=stop,
+        )
 
     @cached_property
     def is_available(self) -> bool:
@@ -156,6 +175,17 @@ def cli(ctx, debug, color):
 
 
 @cli.command()
+@click.argument("date")
+@click.argument("time")
+@click.pass_context
+def get(ctx, datestr, timestr):
+    parser_settings = {"PREFER_DATES_FROM": "future"}
+
+    parser_settings = {"PREFER_DATES_FROM": "future"}
+    date = dateparser.parse(ts, settings=parser_settings)
+
+
+@cli.command()
 @click.argument("dates", nargs=-1)
 @click.pass_context
 def scan(ctx, dates):
@@ -184,7 +214,7 @@ def print_reservations(days: t.Sequence[Day], use_color: bool):
         for r in reservations:
             fg = "green" if r.is_available else "red"
 
-            msg = f"\t{r.slot}\t{r.spaces}\t{r.availability}"
+            msg = f"\t{r.slot}\t{r.spaces}\t{r.availability}\t{r.start}"
             click.echo(click.style(msg, fg=fg), color=use_color)
 
 
