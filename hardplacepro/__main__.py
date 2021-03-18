@@ -238,7 +238,7 @@ def print_reservations(days: t.Sequence[Day], use_color: bool):
         for r in reservations:
             fg = "green" if r.is_available else "red"
 
-            msg = f"\t{r.slot}\t{r.spaces}\t{r.availability}\t{r.start}"
+            msg = f"\t{r.slot}  \t{r.spaces}\t{r.availability}"
             click.echo(click.style(msg, fg=fg), color=use_color)
 
 
