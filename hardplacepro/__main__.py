@@ -64,7 +64,7 @@ class Reservation:
         return self.availability == "available"
 
 
-# Best be blood offering
+# This best be a blood offering. Other offerings are fucking boring
 OFFERING = "82956994a32d4ece965f4903614cf6c8"
 COURSE = "b21f8c4cea31f4f8d388ae05232096c8fb5f058a"
 
@@ -72,6 +72,7 @@ COURSE = "b21f8c4cea31f4f8d388ae05232096c8fb5f058a"
 def query(ts: datetime) -> t.Sequence[Reservation]:
     http = urllib3.PoolManager()
 
+    # These fields are indication of a thoughtful, elegant, well factored app.
     fields = {
         "PreventChromeAutocomplete": "",
         "random": "603e65c25539a",
@@ -131,11 +132,8 @@ def setup(debug):
     logging.getLogger("asyncio").level = logging.FATAL
 
 
-@click.command()
-@click.argument("date", nargs=-1)
-@click.option(
-    "--debug", type=bool, default=False, help="Enable debug logging", required=False
-)
+@click.group()
+@click.option("--debug/--no-debug", default=False)
 @click.option(
     "--color",
     type=click.Choice(["never", "auto", "always"]),
@@ -143,35 +141,52 @@ def setup(debug):
     help="Enable debug logging",
     required=False,
 )
-def main(date, debug, color):
+@click.pass_context
+def cli(ctx, debug, color):
     setup(debug)
 
-    color_output: t.Optional[bool] = None
+    ctx.ensure_object(dict)
+
+    use_color = ctx.color
     if color == "never":
-        color_output = False
+        use_color = False
     if color == "always":
-        color_output = True
+        use_color = True
+    ctx.obj["use_color"] = color
 
-    daily_reservations = []
 
-    timestamps = [
-        dateparser.parse(ts, settings={"PREFER_DATES_FROM": "future"}) for ts in date
-    ]
-    if not all(timestamps):
-        print("One or more invalid timestamps. You figure it out.")
+@cli.command()
+@click.argument("dates", nargs=-1)
+@click.pass_context
+def scan(ctx, dates):
+    parser_settings = {"PREFER_DATES_FROM": "future"}
+    timestamps = [(ts, dateparser.parse(ts, settings=parser_settings)) for ts in dates]
+
+    invalid = [pair[0] for pair in timestamps if pair[1] is None]
+    if any(invalid):
+        print(f"One or more invalid timestamps: {invalid}. Fix yo shit.")
         return None
 
-    for ts in timestamps:
+    daily_reservations = []
+    for _, ts in timestamps:
         daily_reservations.append((ts, query(ts)))
 
-    for date, reservations in daily_reservations:
+    print_reservations(daily_reservations, ctx.obj["use_color"])
+
+
+Day = t.Tuple[t.Any, t.Sequence[Reservation]]
+
+
+def print_reservations(days: t.Sequence[Day], use_color: bool):
+    for date, reservations in days:
         dow = calendar.day_name[date.weekday()]
         print(date.strftime(f"%Y-%m-%d {dow}"))
         for r in reservations:
             fg = "green" if r.is_available else "red"
+
             msg = f"\t{r.slot}\t{r.spaces}\t{r.availability}"
-            click.echo(click.style(msg, fg=fg), color=color_output)
+            click.echo(click.style(msg, fg=fg), color=use_color)
 
 
 if __name__ == "__main__":
-    main()
+    cli()
